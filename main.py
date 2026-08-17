@@ -1,12 +1,8 @@
-import time
 from datetime import datetime
 
 from config import validate_config
 from notion import get_posts, update_post_status
 from publisher import publish_post
-
-
-CHECK_INTERVAL = 60  # kontrola Notionu každých 60 sekund
 
 
 def process_posts() -> None:
@@ -63,43 +59,26 @@ def process_posts() -> None:
 
 
 def main() -> None:
-    print("🚀 Content Planner Worker startuje...\n")
+    print("🚀 Content Planner startuje...\n")
 
     validate_config()
 
     print("✅ Konfigurace OK")
+
+    print("=" * 60)
     print(
-        f"🔄 Notion kontroluji každých "
-        f"{CHECK_INTERVAL} sekund."
+        "🔎 Kontrola:",
+        datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
     )
-    print("🟢 Worker běží. CTRL+C = ukončení.\n")
 
-    while True:
-        try:
-            print("=" * 60)
-            print(
-                "🔎 Kontrola:",
-                datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
-            )
+    try:
+        process_posts()
 
-            process_posts()
+    except Exception as error:
+        print("❌ Kontrola skončila chybou.")
+        print(f"Chyba: {error}")
 
-        except Exception as error:
-            # Jedna chyba nesmí shodit celý worker.
-            print("❌ Kontrola skončila chybou.")
-            print(f"Chyba: {error}")
-
-        print(
-            f"\n💤 Další kontrola za "
-            f"{CHECK_INTERVAL} sekund...\n"
-        )
-
-        try:
-            time.sleep(CHECK_INTERVAL)
-
-        except KeyboardInterrupt:
-            print("\n🛑 Content Planner ukončen.")
-            break
+    print("\n🏁 Content Planner dokončil kontrolu.")
 
 
 if __name__ == "__main__":
